@@ -31,7 +31,20 @@ import zixing.bluetooth.unlocker.activity.MainActivity;
 
 public class BluetoothHelper {
 
+    private static final boolean DEBUG_LOG = false;
+
     private static void myLog(String msg) {
+        if (!DEBUG_LOG) {
+            return;
+        }
+        writeLog(msg);
+    }
+
+    private static void errorLog(String msg) {
+        writeLog(msg);
+    }
+
+    private static void writeLog(String msg) {
         try {
             Log.i("hookhelper", msg);
             if (MainActivity.self == null) {
@@ -89,7 +102,7 @@ public class BluetoothHelper {
                 }
             }
         } catch (Exception ex) {
-            myLog("发生错误：" + ex.toString());
+            errorLog("发生错误：" + ex.toString());
         }
         return false;
     }
@@ -126,7 +139,7 @@ public class BluetoothHelper {
             scanRssiAndAct(context, mac, type);
         } catch (Exception ex) {
             scanning.set(false);
-            myLog("发生错误：" + ex.toString());
+            errorLog("发生错误：" + ex.toString());
         }
     }
 
@@ -159,7 +172,7 @@ public class BluetoothHelper {
             BluetoothDevice bonded = adapter.getRemoteDevice(mac);
             if (bonded != null) targetNameTmp = bonded.getName();
         } catch (Exception ex) {
-            myLog("获取目标设备名异常：" + ex.toString());
+            errorLog("获取目标设备名异常：" + ex.toString());
         }
         final String targetName = targetNameTmp;
         myLog("目标 mac=" + macUpper + " name=" + targetName);
@@ -214,7 +227,7 @@ public class BluetoothHelper {
 
             @Override
             public void onScanFailed(int errorCode) {
-                myLog("扫描失败 errorCode=" + errorCode);
+                errorLog("扫描失败 errorCode=" + errorCode);
                 finishScan(scanner, this, handler, finished, Integer.MIN_VALUE, type);
             }
         };
@@ -231,7 +244,7 @@ public class BluetoothHelper {
             scanner.startScan(Collections.<ScanFilter>emptyList(), settings, callback);
             myLog("LeScan 启动（无过滤诊断模式）目标=" + macUpper);
         } catch (Exception ex) {
-            myLog("startScan 异常：" + ex.toString());
+            errorLog("startScan 异常：" + ex.toString());
             scanning.set(false);
             handleResult(Integer.MIN_VALUE, type);
             return;
@@ -273,7 +286,7 @@ public class BluetoothHelper {
                 Object r = BluetoothDevice.class.getMethod("isConnected").invoke(dev);
                 if (r instanceof Boolean) aclConnected = (Boolean) r;
             } catch (Exception ex) {
-                myLog("isConnected 反射异常: " + ex.toString());
+                errorLog("isConnected 反射异常: " + ex.toString());
             }
 
             int adapterAclState = -1;
@@ -311,7 +324,7 @@ public class BluetoothHelper {
                 }
             }
         } catch (Exception ex) {
-            myLog("回退异常: " + ex.toString());
+            errorLog("回退异常: " + ex.toString());
         }
         return Integer.MIN_VALUE;
     }
@@ -323,7 +336,7 @@ public class BluetoothHelper {
         try {
             scanner.stopScan(callback);
         } catch (Exception ex) {
-            myLog("stopScan 异常：" + ex.toString());
+            errorLog("stopScan 异常：" + ex.toString());
         }
         handler.removeCallbacksAndMessages(null);
         scanning.set(false);
